@@ -29,9 +29,9 @@ OK: athrill2 is created on /Users/tmori/project/oss/baremetal-athrill-v850e2m/at
 
 このメッセージが表示されれば、Athrillのビルドが成功しています。
 
-## ベアメタルプログラムのビルド
+## ベアメタルプログラム・ビルド環境のインストール
 
-ベアメタルのプログラムをビルドするには、v850のクロスコンパイラが必要になります。このリポジトリには、Dockerを使用してクロスコンパイル環境をセットアップするスクリプトが含まれています。
+ベアメタルのプログラムをビルドするには、v850のクロスコンパイラが必要になります。このリポジトリには、Dockerを使用してクロスコンパイル環境をインストールする必要があります。
 
 以下のコマンドを実行して、Dockerイメージを作成します。
 
@@ -53,6 +53,35 @@ toppersjp/athrill-v850e2m-builder     v1.0.0         ca4510b27935   5 hours ago 
 ```
 
 このイメージを使用して、ベアメタルプログラムのビルドを行うことができます。
+
+## サンプルプログラムのビルド方法
+
+サンプルプログラムのビルドは、サンプルプログラム名を指定して実行します。
+
+例：サンプルプログラム名が`step1`の場合
+```bash
+bash docker/build.bash step1
+```
+
+成功すると、以下のログが出力されます。
+
+```bash
+bash docker/build.bash step1
+arm64
+Mac
+ROOT_PATH=/root
+ATHRILL_ROOT=/root/athrill-target-v850e2m
+BUILD_PATH=/root/workspace/build
+CPU_CONFIG_PATH=/root/athrill-target-v850e2m/src/cpu/config
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow start.S
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow vector.S
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow training.S
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow main.c
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow test_suite.c
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow test_instruction.S
+v850-elf-gcc -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow -nostdlib -T /root/workspace/build/v850esfk3.ld -o test_main.elf start.o vector.o training.o main.o test_suite.o test_instruction.o -Wl,-Map,test_main.elf.map -lm -lgcc -lc
+v850-elf-objdump -d test_main.elf > test_main.elf.dump
+```
 
 ## サンプルプログラムの説明
 
@@ -230,3 +259,201 @@ add1_0_test_fail:
 
 ベアメタルプログラムを理解するための格好の教材となっており、特にCPUレジスタやポインタアクセスの理解に役立つ内容となっています。
 
+## Athrillでサンプルプログラムを動かそう！
+
+Athrillでサンプルプログラムを動かすには、サンプルプログラム名を引数にして、`workspace/run/exec.bash` を実行するだけです。
+
+
+実行方法：
+```
+% bash workspace/run/exec.bash step1
+core id num=1
+ROM : START=0x0 SIZE=512
+RAM : START=0x5ff7000 SIZE=512
+ELF SET CACHE RIGION:addr=0x0 size=2 [KB]
+Elf loading was succeeded:0x0 - 0x9d0 : 2.464 KB
+Elf loading was succeeded:0x9d0 - 0xddc : 0.0 KB
+ELF SYMBOL SECTION LOADED:index=15
+ELF SYMBOL SECTION LOADED:sym_num=43
+ELF STRING TABLE SECTION LOADED:index=16
+DEBUG_FUNC_FT_LOG_SIZE=1024
+[DBG>
+HIT break:0x0
+```
+
+成功すると、このように、０番地でCPUが停止した状態になります。
+
+この状態でCPUレジスタ状態を確認してみましょう。cpuコマンドです。
+
+```
+cpu
+***CPU<0>***
+PC              0x0
+R0              0x0
+R1              0x0
+R2              0x0
+R3              0x0 Stack Pointer
+R4              0x0
+R5              0x0
+R6              0x0 Arg1
+R7              0x0 Arg2
+R8              0x0 Arg3
+R9              0x0 Arg4
+R10             0x0 Return Value
+R11             0x0
+R12             0x0
+R13             0x0
+R14             0x0
+R15             0x0
+R16             0x0
+R17             0x0
+R18             0x0
+R19             0x0
+R20             0x0
+R21             0x0
+R22             0x0
+R23             0x0
+R24             0x0
+R25             0x0
+R26             0x0
+R27             0x0
+R28             0x0
+R29             0x0
+R30             0x0
+R31             0x0
+EIPC            0x0
+EIPSW           0x0
+ECR             0x0
+PSW             0x20
+SCCFG           0x0
+SCBP            0x0
+EIIC            0x0
+FEIC            0x0
+FEPC            0x0
+FEPSW           0x0
+CTBP            0x0
+EIWR            0x0
+FEWR            0x0
+BSEL            0x0
+VSECR = 0x00000000
+VSTID = 0x00000000
+VSADR = 0x00000000
+VMECR = 0x00000000
+VMTID = 0x00000000
+VMADR = 0x00000000
+MPM = 0x00000000
+MPC = 0x00000000
+TID = 0x00000000
+```
+
+ご覧の通り、PSW以外は全て０ですね。
+
+次に、１命令実行してみましょう。`n`コマンドです。
+
+```
+[DBG>n
+[DONE> core0 pc=0x0 null(null) 0x0: JR disp22(2000):0x7d0
+```
+
+このように、`JR` 命令が実行されていることがわかります。
+cpuコマンドでプログラムカウンタを参照すると、このようにジャンプしたアドレスがセットされていることがわかりますね。
+```
+PC              0x7d0 start(+0x0)
+```
+
+このままステップ実行を続けると、命令実行に従って、CPUレジスタがどのように変化するかをみてみるとCPUの理解が深まると思います。
+それでは、処理継続させて、main関数でブレークできるようにしましょう。`b`コマンドです。
+
+```
+[DBG>b main
+break main 0x874
+```
+
+ブレーク設定されたメッセージが出力されました。このまま `c` コマンドでコンティニューします。
+
+```
+[DBG>c
+[CPU>
+HIT break:0x874 main(+0x0)
+```
+
+うまくブレークされました。`ft`コマンドを実行すると、処理の流れが見えます。
+
+```
+[DBG>ft 10
+core0: <(null)                        (0xffffffea)> [  2] <0x000> start
+core0: <test_data_uint32              (0x000)> [  1] <0x000> training
+core0: <test_data_uint32              (0x000)> [  0] <0x000> main
+```
+
+`start｀ から始まり、`training` を経て、`main` 関数に入っていることがわかります。
+
+それでは、`main`関数を実行してみましょう。プログラム断片はこうです。
+
+```C
+int global_value;
+int *global_value_pointer;
+int main(void)
+{
+	global_value_pointer = &global_value;
+```
+
+`global_value_pointer` は、ポインタ変数です。
+`main`関数の中で、`global_value`のアドレスを格納していますね。
+
+ここで、これらの変数のメモリを参照してみましょう。`p` コマンドです。
+
+```
+[DBG>p global_value_pointer
+global_value_pointer = (int *: 4 ) 0x0  @ 0x5ff7000(0x0)
+[DBG>p global_value
+global_value = 0 (int:4) @ 0x5ff7408(0x0)
+```
+
+`global_value_pointer` と `global_value` はそれぞれ、`0x5ff7000` と `0x5ff7408` にメモリ確保されており、値は０ですね。
+このまま処理を進めましょう。
+
+```
+[DBG>n
+[DONE> core0 pc=0x874 main(+0) 0x874: ADD imm5(-8),r3(100627460):100627452
+[DBG>n
+[DONE> core0 pc=0x876 main(+2) 0x876: ST.W r31(0x0), disp16(4) r3(0x5ff73fc):0x0
+[DBG>n
+[DONE> core0 pc=0x87a main(+6) 0x87a: ST.W r29(0x0), disp16(0) r3(0x5ff73fc):0x0
+[DBG>n
+[DONE> core0 pc=0x87e main(+a) 0x87e: MOV r3(100627452),r29(0)
+[DBG>n
+[DONE> core0 pc=0x880 main(+c) 0x880: MOV imm32(100626432),r10(0):100626432
+[DBG>n
+[DONE> core0 pc=0x886 main(+12) 0x886: MOV imm32(100627464),r11(0):100627464
+[DBG>n
+[DONE> core0 pc=0x88c main(+18) 0x88c: ST.W r11(0x5ff7408), disp16(0) r10(0x5ff7000):0x5ff7408
+[DBG>p global_value_pointer
+global_value_pointer = (int *: 4 ) 0x5ff7408  @ 0x5ff7000(0x0)
+```
+
+`global_value_pointer` に、`global_value` のアドレス `0x5ff7408`が設定されましたね。C言語のポインタ操作をこのようにアセンブラ命令レベルで追いかけると理解が深まると思います。
+
+ちなみに、`cpu`コマンドでレジスタ情報も見てみましょう。
+
+```
+R10             0x5ff7000 global_value_pointer(+0x0) Return Value
+R11             0x5ff7408 global_value(+0x0)
+```
+
+作業用に、`R10` と `R11` にアドレスを一時格納した形跡が見て取れますね。
+
+このまま、プログラを実行しましょう。
+
+```
+c
+[CPU>
+
+Hello World!
+
+PASSED : do_test_add1_1
+```
+
+最終的にプログラムを実行すると、シリアル出力に Hello World! が表示され、テストも通過したことが確認できます。
+
+Athrillを使用したアセンブラ言語レベルでの高度なデバッグを体験できました。このリポジトリを使って、V850アセンブリ言語の理解を深め、ベアメタルプログラムのデバッグを学んでください。皆さんからのフィードバックをお待ちしています！
