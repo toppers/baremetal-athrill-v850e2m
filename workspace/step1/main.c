@@ -22,7 +22,10 @@ int main(void)
 	global_value_pointer = &global_value;
 
 	*global_value_pointer = 999;
+	test_print("\n");
+	test_print("Hello World!\n");
 
+	test_suite();
 	while (1) {
 		;
 	}
