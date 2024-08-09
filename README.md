@@ -1,6 +1,6 @@
 # baremetal-athrill-v850e2m
 
-このリポジトリでは、アセンブラ言語(v850)で作成したプログラムをCPUエミュレータAthrillで動かすことができます。これにより、CPUレジスタの動きやメモリの関係、さらにはC言語プログラムのポインタ理解に役立てることができます。
+このリポジトリでは、アセンブラ言語(v850)で作成したプログラムをCPUエミュレータ[Athrill](https://www.toppers.jp/athrill.html)で動かすことができます。これにより、CPUレジスタの動きやメモリの関係、さらにはC言語プログラムのポインタ理解に役立てることができます。
 
 ## 動作環境
 - macOS
@@ -100,7 +100,7 @@ memory.txt              test_instruction.S      test_serial.h           vector.S
 
 ### プログラムの流れ
 
-サンプルプログラムでは、`main.c` が実行されるまでの一連の処理が含まれています。プログラムの実行は `vector.S` およびスタートアップルーチン `start.S` から始まり、最終的に `main` 関数に制御が渡されます。これにより、ベアメタルプログラムの動作の本質を学ぶことができます。
+サンプルプログラムでは、[main.c](./workspace/step1/main.c) が実行されるまでの一連の処理が含まれています。プログラムの実行は [vector.S](./workspace/step1/vector.S) およびスタートアップルーチン [start.S](./workspace/step1/start.S) から始まり、最終的に `main` 関数に制御が渡されます。これにより、ベアメタルプログラムの動作の本質を学ぶことができます。
 
 #### スタートアップルーチン `start.S`
 
@@ -120,7 +120,7 @@ _start:
 .size	_start, .-_start
 ```
 
-このルーチンでは、スタックの初期化と割り込みの無効化/有効化を行い、その後 `_training` ラベルへジャンプします。
+このルーチンでは、スタックの初期化と割り込みの無効化/有効化を行い、その後 [training.S](./workspace/step1/training.S)の`_training` ラベルへジャンプします。
 
 #### トレーニングコード `_training`
 
@@ -190,7 +190,7 @@ int main(void)
 
 ### テストスイート `test_suite`
 
-`test_suite` では、以下のような `addi` 命令のテストが含まれています。
+[test_suite.c](./workspace/step1/test_suite.c)の`test_suite` では、以下のような `addi` 命令のテストが含まれています。
 
 ```assembly
 #include "test_data.h"
