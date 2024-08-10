@@ -16,7 +16,7 @@ cd workspace/run
 
 ../../athrill-target-v850e2m/cmake-build/athrill2 \
     -c1 \
-    -m ../${APPNAME}/memory.txt \
-    -d ../${APPNAME}/device_config.txt\
+    -m memory.txt \
+    -d device_config.txt\
     -i \
     ../${APPNAME}/test_main.elf
