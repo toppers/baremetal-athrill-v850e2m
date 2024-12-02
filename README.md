@@ -88,10 +88,17 @@ v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config
 v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow vector.S
 v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow training.S
 v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow main.c
+v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow pointer.c
 v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow test_suite.c
 v850-elf-gcc -c -I. -I/root/common -I/root/athrill-target-v850e2m/src/cpu/config -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow test_instruction.S
-v850-elf-gcc -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow -nostdlib -T /root/workspace/build/v850esfk3.ld -o test_main.elf start.o vector.o training.o main.o test_suite.o test_instruction.o -Wl,-Map,test_main.elf.map -lm -lgcc -lc
+v850-elf-gcc -O0 -mdisable-callt -mno-app-regs -mtda=0 -gdwarf-2 -Wall -Wno-unused-label -Wpointer-arith  -mv850e2 -Wa,-mno-bcond17 -Wa,-mwarn-signed-overflow -Wa,-mwarn-unsigned-overflow -nostdlib -T /root/workspace/build/v850esfk3.ld -o test_main.elf start.o vector.o training.o main.o pointer.o test_suite.o test_instruction.o -Wl,-Map,test_main.elf.map -lm -lgcc -lc
 v850-elf-objdump -d test_main.elf > test_main.elf.dump
+```
+
+ビルドしたバイナリをクリーンするには、以下のコマンドを実行します。
+
+```bash
+bash docker/clean.bash step1
 ```
 
 ## サンプルプログラムの説明
@@ -103,10 +110,8 @@ ls workspace/step1
 ```
 
 ```
-Makefile                start.S                 test_main.elf           test_suite.c
-device_config.txt       test_check.h            test_main.elf.map       training.S
-main.c                  test_data.h             test_reg.h              v850asm.inc
-memory.txt              test_instruction.S      test_serial.h           vector.S
+Makefile                pointer.c               serial_api.h            test_check.h            test_instruction.S      test_serial.h           training.S              vector.S
+main.c                  pointer.h               start.S                 test_data.h             test_reg.h              test_suite.c            v850asm.inc
 ```
 
 ### プログラムの流れ
@@ -138,7 +143,9 @@ _start:
 `_training` ラベルには、アセンブラ言語でのジャンプ呼び出し練習として以下のコードが含まれています。
 
 ```assembly
-.section	".text" , "ax"
+#include "v850asm.inc"
+
+.section	".text", "ax"
 .align	4
 .globl	_training
 .type   _training, @function
@@ -146,14 +153,14 @@ _training:
     /*****************************
      * START
      *****************************/
-
-    addi 1024, r9 r19
+    addi 1024, r9, r19
 
     /*****************************
      * END
      *****************************/
-    br _main
-.size	_training, .-_training
+    Lea _main, r10
+    jmp [r10]              // r10 の指すアドレスにジャンプ
+.size		_training, .-_training
 ```
 
 このコードでは、`r9` レジスタに `1024` を加算し、その結果を `r19` に格納します。その後、`main` 関数にジャンプします。
@@ -164,6 +171,8 @@ _training:
 
 ```c
 #include "test_serial.h"
+#include "serial_api.h"
+#include "pointer.h"
 
 unsigned char stack_data[1024];
 
@@ -177,16 +186,34 @@ void test_print(const char *str)
 	for (i = 0; str[i] != '\0'; i++) {
 		*(SERIAL_OUT_ADDR) = str[i];
 	}
-	*(SERIAL_OUT_ADDR) = '\n';
+	//*(SERIAL_OUT_ADDR) = '\n';
+}
+void test_serial_hex(unsigned int data)
+{
+	int i;
+	unsigned int mask = 0xF0000000;
+	unsigned int shift = 28;
+	unsigned int hex_data;
+	*(SERIAL_OUT_ADDR) = '0';
+	*(SERIAL_OUT_ADDR) = 'x';
+	for (i = 0; i < 8; i++) {
+		hex_data = (data & mask) >> shift;
+		if (hex_data < 10) {
+			*(SERIAL_OUT_ADDR) = '0' + hex_data;
+		} else {
+			*(SERIAL_OUT_ADDR) = 'A' + hex_data - 10;
+		}
+		mask = mask >> 4;
+		shift -= 4;
+	}
 }
 
-int global_value;
-int *global_value_pointer;
 int main(void)
 {
-	global_value_pointer = &global_value;
+	pointer_init();
+	pointer_write();
+	pointer_read();
 
-	*global_value_pointer = 999;
 	test_print("\n");
 	test_print("Hello World!\n");
 
@@ -415,60 +442,6 @@ core0: <test_data_uint32              (0x000)> [  0] <0x000> main
 
 `start｀ から始まり、`training` を経て、`main` 関数に入っていることがわかります。
 
-それでは、`main`関数を実行してみましょう。プログラム断片はこうです。
-
-```C
-int global_value;
-int *global_value_pointer;
-int main(void)
-{
-	global_value_pointer = &global_value;
-```
-
-`global_value_pointer` は、ポインタ変数です。
-`main`関数の中で、`global_value`のアドレスを格納していますね。
-
-ここで、これらの変数のメモリを参照してみましょう。`p` コマンドです。
-
-```
-[DBG>p global_value_pointer
-global_value_pointer = (int *: 4 ) 0x0  @ 0x5ff7000(0x0)
-[DBG>p global_value
-global_value = 0 (int:4) @ 0x5ff7408(0x0)
-```
-
-`global_value_pointer` と `global_value` はそれぞれ、`0x5ff7000` と `0x5ff7408` にメモリ確保されており、値は０ですね。
-このまま処理を進めましょう。
-
-```
-[DBG>n
-[DONE> core0 pc=0x874 main(+0) 0x874: ADD imm5(-8),r3(100627460):100627452
-[DBG>n
-[DONE> core0 pc=0x876 main(+2) 0x876: ST.W r31(0x0), disp16(4) r3(0x5ff73fc):0x0
-[DBG>n
-[DONE> core0 pc=0x87a main(+6) 0x87a: ST.W r29(0x0), disp16(0) r3(0x5ff73fc):0x0
-[DBG>n
-[DONE> core0 pc=0x87e main(+a) 0x87e: MOV r3(100627452),r29(0)
-[DBG>n
-[DONE> core0 pc=0x880 main(+c) 0x880: MOV imm32(100626432),r10(0):100626432
-[DBG>n
-[DONE> core0 pc=0x886 main(+12) 0x886: MOV imm32(100627464),r11(0):100627464
-[DBG>n
-[DONE> core0 pc=0x88c main(+18) 0x88c: ST.W r11(0x5ff7408), disp16(0) r10(0x5ff7000):0x5ff7408
-[DBG>p global_value_pointer
-global_value_pointer = (int *: 4 ) 0x5ff7408  @ 0x5ff7000(0x0)
-```
-
-`global_value_pointer` に、`global_value` のアドレス `0x5ff7408`が設定されましたね。C言語のポインタ操作をこのようにアセンブラ命令レベルで追いかけると理解が深まると思います。
-
-ちなみに、`cpu`コマンドでレジスタ情報も見てみましょう。
-
-```
-R10             0x5ff7000 global_value_pointer(+0x0) Return Value
-R11             0x5ff7408 global_value(+0x0)
-```
-
-作業用に、`R10` と `R11` にアドレスを一時格納した形跡が見て取れますね。
 
 このまま、プログラを実行しましょう。
 
@@ -481,6 +454,6 @@ Hello World!
 PASSED : do_test_add1_1
 ```
 
-最終的にプログラムを実行すると、シリアル出力に Hello World! が表示され、テストも通過したことが確認できます。
+プログラムを実行すると、シリアル出力に Hello World! が表示され、テストも通過したことが確認できます。
 
 Athrillを使用したアセンブラ言語レベルでの高度なデバッグを体験できました。このリポジトリを使って、V850アセンブリ言語の理解を深め、ベアメタルプログラムのデバッグを学んでください。皆さんからのフィードバックをお待ちしています！
