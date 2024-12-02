@@ -33,13 +33,13 @@ OK: athrill2 is created on /Users/tmori/project/oss/baremetal-athrill-v850e2m/at
 
 ベアメタルのプログラムをビルドするには、v850のクロスコンパイラが必要になります。このリポジトリには、Dockerを使用してクロスコンパイル環境をインストールする必要があります。
 
-以下のコマンドを実行して、Dockerイメージを作成します。
+以下のコマンドを実行して、Dockerイメージを取得します。
 
 ```bash
-bash docker/create-image.bash
+bash docker/pull-image.bash
 ```
 
-成功すると、Dockerイメージが作成されます。作成されたイメージは、以下のコマンドで確認できます。
+成功すると、Dockerイメージがダウンロードされます。取得したイメージは、以下のコマンドで確認できます。
 
 ```bash
 docker images
