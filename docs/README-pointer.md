@@ -58,3 +58,118 @@ int value = *global_value_pointer;
 |st.w|ワードデータをメモリに書き込む|
 |add|加算|
 |movea|レジスタ間のアドレス転送|
+
+## アドレス
+
+|アドレス|内容|
+|---|---|
+|0x5ff7404|global_value_pointer|
+|0x5ff7408|global_value|
+
+athrillでの確認結果：
+
+```
+p global_value
+global_value = 0 (int:4) @ 0x5ff7408(0x0)
+[DBG>p global_value_pointer
+global_value_pointer = (int *: 4 ) 0x0  @ 0x5ff7404(0x0)
+```
+
+### ポインタの初期化のアセンブラ命令
+
+Cコード：
+
+```c
+global_value_pointer = &global_value;
+```
+
+アセンブラ命令：
+```asm
+ a06:	2a 06 04 74 	mov	0x5ff7404, r10
+ a0a:	ff 05 
+ a0c:	2b 06 08 74 	mov	0x5ff7408, r11
+ a10:	ff 05 
+ a12:	6a 5f 01 00 	st.w	r11, 0[r10]
+```
+
+athrillでの確認結果：
+
+`0xa06`にブレーク設定：
+```
+[DBG>b 0xa06
+break 0xa06
+[DBG>c
+```
+
+`c`コマンドでCPUをブレークポイントまで実行させる。
+```
+[CPU>INFO: INITIALIZE POINTER
+global_value = 0x12345678
+
+HIT break:0xa06 pointer_init(+0x72)
+EDITOR_SEARCH_PATH_0 = ../step1
+[NEXT> pc=0xa06 pointer.c 13
+```
+
+この時のCPUのレジスタR10とR11の値を確認する。
+```
+cpu
+R10             0x0 Return Value
+R11             0xc0a
+```
+
+次の命令に進む。
+```asm
+mov	0x5ff7404, r10
+```
+
+```
+[DBG>n
+[DONE> core0 pc=0xa06 pointer_init(+72) 0xa06: MOV imm32(100627460),r10(0):100627460
+EDITOR_SEARCH_PATH_0 = ../step1
+[NEXT> pc=0xa0c pointer.c 13
+```
+
+この時のCPUのレジスタR10とR11の値を確認する。
+```
+cpu
+R10             0x5ff7404 global_value_pointer(+0x0) Return Value
+R11             0xc0a
+```
+
+次の命令に進む。
+```asm
+mov	0x5ff7408, r11
+```
+
+```
+[DBG>n
+[DONE> core0 pc=0xa0c pointer_init(+78) 0xa0c: MOV imm32(100627464),r11(3082):100627464
+EDITOR_SEARCH_PATH_0 = ../step1
+[NEXT> pc=0xa12 pointer.c 13
+```
+
+この時のCPUのレジスタR10とR11の値を確認する。
+```
+cpu
+R10             0x5ff7404 global_value_pointer(+0x0) Return Value
+R11             0x5ff7408 global_value(+0x0)
+```
+
+次の命令に進む。
+```asm
+st.w	r11, 0[r10]
+```
+```
+[DBG>n
+[DONE> core0 pc=0xa12 pointer_init(+7e) 0xa12: ST.W r11(0x5ff7408), disp16(0) r10(0x5ff7404):0x5ff7408
+EDITOR_SEARCH_PATH_0 = ../step1
+[NEXT> pc=0xa16 pointer.c 14
+```
+
+この時のポインタの値を確認する。
+```
+[DBG>p global_value_pointer
+global_value_pointer = (int *: 4 ) 0x5ff7408  @ 0x5ff7404(0x0)
+````
+
