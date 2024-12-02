@@ -53,8 +53,6 @@ int value = *global_value_pointer;
 |mov|レジスタ間のデータ転送|
 |ld.w|メモリからワードデータを読み込む|
 |st.w|ワードデータをメモリに書き込む|
-|add|加算|
-|movea|レジスタ間のアドレス転送|
 
 ---
 
