@@ -6,6 +6,12 @@
 - macOS
 - Ubuntu 22.04
 
+## V850ハードウェアマニュアル
+
+V850E2Mのハードウェアマニュアルは、以下のリンクからダウンロードできます。
+
+https://www.renesas.com/ja/document/lbr/v850e2s-users-manual-architecture?srsltid=AfmBOoqYq2vh4w2W4SnqPHHl_LDucLJcuquwhjYxLkwnok4Da03Y6whD
+
 ## インストール方法
 
 以下のコマンドを実行して、Athrillをビルドします。
