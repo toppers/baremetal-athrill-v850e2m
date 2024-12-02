@@ -5,6 +5,11 @@
 ## 動作環境
 - macOS
 - Ubuntu 22.04
+- WSL2(Windowsの場合)
+
+## 前提とする環境
+
+- Visual Studio Code
 
 ## V850ハードウェアマニュアル
 
@@ -269,10 +274,17 @@ add1_0_test_fail:
 
 Athrillでサンプルプログラムを動かすには、サンプルプログラム名を引数にして、`workspace/run/exec.bash` を実行するだけです。
 
+```bash
+bash workspace/run/exec.bash　<サンプルプログラム名>
+```
 
 実行方法：
-```
+```bash
 % bash workspace/run/exec.bash step1
+```
+
+出力ログ：
+```bash
 core id num=1
 ROM : START=0x0 SIZE=512
 RAM : START=0x5ff7000 SIZE=512
@@ -285,9 +297,17 @@ ELF STRING TABLE SECTION LOADED:index=16
 DEBUG_FUNC_FT_LOG_SIZE=1024
 [DBG>
 HIT break:0x0
+EDITOR_SEARCH_PATH_0 = ../step1
+[NEXT> pc=0x0 vector.S 6
 ```
 
 成功すると、このように、０番地でCPUが停止した状態になります。
+
+また、`l` コマンドを実行すると、Visual Studio Codeのエディタが起動し、プログラムのソースコードが表示されます。
+
+イメージ：
+![image](images/visual_studio_code.png)
+
 
 この状態でCPUレジスタ状態を確認してみましょう。cpuコマンドです。
 
