@@ -306,6 +306,7 @@ EDITOR_SEARCH_PATH_0 = ../step1
 また、`l` コマンドを実行すると、Visual Studio Codeのエディタが起動し、プログラムのソースコードが表示されます。
 
 イメージ：
+
 ![image](images/visual_studio_code.png)
 
 
