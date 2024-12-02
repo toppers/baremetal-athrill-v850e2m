@@ -87,17 +87,15 @@ global_value_pointer = (int *: 4 ) 0x0  @ 0x5ff7404(0x0)
 
 #### athrillコマンドの実行結果
 
-| コマンド             | 結果                           |
+| コマンド             | 説明                           |
 |----------------------|--------------------------------|
-| b 0xa06              | break 0xa06                   |
-| c                    | INFO: INITIALIZE POINTER       |
-|                      | global_value = 0x12345678      |
-| cpu                  | R10: 0x0 (Return Value)        |
-|                      | R11: 0xc0a                    |
-| n (mov 0x5ff7404, r10)| R10: 0x5ff7404                |
-|                      | R11: 0xc0a                    |
-| n (mov 0x5ff7408, r11)| R11: 0x5ff7408                |
-| n (st.w r11, 0[r10])  | global_value_pointer = 0x5ff7408|
+| b 0xa06              | ブレークポイント0xa06を設定                    |
+| c                    | CPUをブレークポイントまで実行させる       |
+| cpu                  | CPUレジスタを確認 R10, R11        |
+| n                    |命令実行(mov 0x5ff7404, r10), 0x5ff7404: global_value_pointerのアドレス|
+| n| 命令実行(mov 0x5ff7408, r11), 0x5ff7408: global_valueのアドレス|
+| n   | 命令実行(st.w r11, 0[r10])|
+| p global_value_pointer | global_value_pointer の値(0x5ff7408)を確認|
 
 #### レジスタの値変化
 
@@ -125,18 +123,15 @@ global_value_pointer = (int *: 4 ) 0x0  @ 0x5ff7404(0x0)
 
 | コマンド             | 結果                           |
 |----------------------|--------------------------------|
-| b 0xa82              | break 0xa82                   |
-| c                    | INFO: INITIALIZE POINTER       |
-|                      | global_value = 0x12345678      |
-| cpu                  | PC: 0xa82                     |
-|                      | R10: 0x0                      |
-|                      | R11: 0xc24                    |
-| n (mov 0x5ff7404, r10)| R10: 0x5ff7404                |
-|                      | PC: 0xa88                     |
-| n (ld.w 0[r10], r10) | R10: 0x5ff7408                |
-|                      | PC: 0xa8c                     |
-| n (mov 0x87654321, r11)| R11: 0x87654321              |
-| n (st.w r11, 0[r10]) | global_value = 0x87654321      |
+| b 0xa82              | ブレークポイント0xa82を設定                    |
+| c                    | CPUをブレークポイントまで実行させる       |
+| cpu                  | CPUレジスタを確認 R10, R11        |
+| n                    |命令実行(mov 0x5ff7404, r10), 0x5ff7404: global_value_pointerのアドレス|
+| n| 命令実行(ld.w 0[r10], r10)|
+| n   | 命令実行(mov 0x87654321, r11)|
+| n   | 命令実行(st.w r11, 0[r10])|
+| p global_value | global_value の値(0x87654321)を確認|
+
 
 #### レジスタの値変化
 
@@ -165,18 +160,13 @@ global_value_pointer = (int *: 4 ) 0x0  @ 0x5ff7404(0x0)
 
 | コマンド             | 結果                           |
 |----------------------|--------------------------------|
-| b 0xac6              | break 0xac6                   |
-| c                    | INFO: READ POINTER            |
-| cpu                  | PC: 0xac6                     |
-|                      | R10: 0x0                      |
-|                      | R11: 0xc39                    |
-| n (mov 0x5ff7404, r10)| R10: 0x5ff7404                |
-|                      | PC: 0xacc                     |
-| n (ld.w 0[r10], r10) | R10: 0x5ff7408                |
-|                      | PC: 0xad0                     |
-| n (ld.w 0[r10], r10) | R10: 0x87654321               |
-|                      | PC: 0xad4                     |
-| n (st.w r10, 0[r29]) | value = 0x87654321            |
+| b 0xac6              | ブレークポイント0xac6を設定                    |
+| c                    | CPUをブレークポイントまで実行させる       |
+| cpu                  | CPUレジスタを確認 R10, R11        |
+| n                    |命令実行(mov 0x5ff7404, r10), 0x5ff7404: global_value_pointerのアドレス|
+| n| 命令実行(ld.w 0[r10], r10)|
+| n   | 命令実行(ld.w 0[r10], r10)|
+| n   | 命令実行(st.w r10, 0[r29])|
 
 #### レジスタの値変化
 
