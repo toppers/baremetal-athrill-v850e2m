@@ -1,7 +1,8 @@
 #ifndef _TEST_CHECK_H_
 #define _TEST_CHECK_H_
 
-extern void test_print(const char *str);
+#include "test_serial.h"
+
 #define DO_TEST(test_func)	\
 do {	\
 	if (test_func() == 0) {	\

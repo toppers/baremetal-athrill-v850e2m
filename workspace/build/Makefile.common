@@ -7,6 +7,7 @@ OBJS	:= start.o
 OBJS	+= vector.o
 OBJS	+= training.o
 OBJS	+= main.o
+OBJS	+= pointer.o
 OBJS	+= test_suite.o
 OBJS	+= test_instruction.o
 

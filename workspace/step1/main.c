@@ -1,4 +1,6 @@
 #include "test_serial.h"
+#include "serial_api.h"
+#include "pointer.h"
 
 unsigned char stack_data[1024];
 
@@ -14,14 +16,32 @@ void test_print(const char *str)
 	}
 	*(SERIAL_OUT_ADDR) = '\n';
 }
+void test_serial_hex(unsigned int data)
+{
+	int i;
+	unsigned int mask = 0xF0000000;
+	unsigned int shift = 28;
+	unsigned int hex_data;
+	for (i = 0; i < 8; i++) {
+		hex_data = (data & mask) >> shift;
+		if (hex_data < 10) {
+			*(SERIAL_OUT_ADDR) = '0' + hex_data;
+		} else {
+			*(SERIAL_OUT_ADDR) = 'A' + hex_data - 10;
+		}
+		mask = mask >> 4;
+		shift -= 4;
+	}
+}
 
 int global_value;
 int *global_value_pointer;
 int main(void)
 {
-	global_value_pointer = &global_value;
+	pointer_init();
+	pointer_write();
+	pointer_read();
 
-	*global_value_pointer = 999;
 	test_print("\n");
 	test_print("Hello World!\n");
 

@@ -1,4 +1,5 @@
 #include "test_check.h"
+#include "serial_api.h"
 
 extern int do_test_add1_1(void);
 
