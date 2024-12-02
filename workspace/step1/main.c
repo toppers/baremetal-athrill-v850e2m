@@ -14,7 +14,7 @@ void test_print(const char *str)
 	for (i = 0; str[i] != '\0'; i++) {
 		*(SERIAL_OUT_ADDR) = str[i];
 	}
-	*(SERIAL_OUT_ADDR) = '\n';
+	//*(SERIAL_OUT_ADDR) = '\n';
 }
 void test_serial_hex(unsigned int data)
 {
@@ -22,6 +22,8 @@ void test_serial_hex(unsigned int data)
 	unsigned int mask = 0xF0000000;
 	unsigned int shift = 28;
 	unsigned int hex_data;
+	*(SERIAL_OUT_ADDR) = '0';
+	*(SERIAL_OUT_ADDR) = 'x';
 	for (i = 0; i < 8; i++) {
 		hex_data = (data & mask) >> shift;
 		if (hex_data < 10) {
@@ -34,8 +36,6 @@ void test_serial_hex(unsigned int data)
 	}
 }
 
-int global_value;
-int *global_value_pointer;
 int main(void)
 {
 	pointer_init();

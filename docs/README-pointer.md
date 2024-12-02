@@ -11,46 +11,43 @@ V850命令セットでC言語のポインタ操作を理解します。
 ポインタを宣言するには、次のようにします。
 
 ```c
-int *p;
+int *global_value_pointer;
 ```
 
-この例では、`int`型のポインタ`p`を宣言しています。`*`はポインタを示す演算子です。
+この例では、`int`型のポインタ`global_value_pointer`を宣言しています。`*`はポインタを示す演算子です。
 
 ### ポインタの初期化
 
 ポインタを初期化するには、次のようにします。
 
 ```c
-int *p;
-int x = 10;
-p = &x;
+int global_value;
+int *global_value_pointer;
+global_value_pointer = &global_value;
 ```
 
-この例では、`int`型の変数`x`を宣言し、そのアドレスを`p`に代入しています。`&`はアドレス演算子です。
+この例では、`int`型の変数`global_value`を宣言し、そのアドレスを`global_value_pointer`に代入しています。`&`はアドレス演算子です。
 
 ### ポインタを使ったメモリ参照
 
 ポインタを参照するには、次のようにします。
 
 ```c
-int *p;
-int x = 10;
-p = &x;
-int y = *p;
+int value = *global_value_pointer;
 ```
+
+この例では、`global_value_pointer`が指すメモリ上のデータを`value`に代入しています。
 
 ### ポインタを使ったメモリ書き込み
 
 ポインタを使ってメモリ上のデータを書き換えることができます。
 
 ```c
-int *p;
-int x = 10;
-p = &x;
-*p = 20;
+*global_value_pointer = 0x87654321;
 ```
 
-この例では、`p`が`x`のアドレスを指している状態から、`p`が指すメモリ上のデータを20に書き換えています。
+この例では、`global_value_pointer`が指すメモリ上のデータを`0x87654321`に書き換えています。
+
 
 ## ポインタ操作で使うV850命令セット
 

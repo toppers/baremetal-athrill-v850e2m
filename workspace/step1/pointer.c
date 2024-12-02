@@ -1,5 +1,7 @@
 #include "serial_api.h"
 #include "pointer.h"
+int global_value;
+int *global_value_pointer;
 
 void pointer_init(void)
 {
