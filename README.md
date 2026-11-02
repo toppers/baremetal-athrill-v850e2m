@@ -19,6 +19,17 @@ https://www.renesas.com/ja/document/lbr/v850e2s-users-manual-architecture?srslti
 
 ## インストール方法
 
+Athrillは、このリポジトリの隣に置いた [athrill](https://github.com/toppers/athrill) と [athrill-target-v850e2m](https://github.com/toppers/athrill-target-v850e2m) からCMakeでビルドします（箱庭 Business Pack と同じ配置です）。
+
+```
+<作業ディレクトリ>/
+├── athrill/
+├── athrill-target-v850e2m/
+└── baremetal-athrill-v850e2m/
+```
+
+隣にまだない場合は、`build-athrill.bash` が自動でcloneします。ビルドにはCMake 3.16以降とC/C++コンパイラが必要です。
+
 以下のコマンドを実行して、Athrillをビルドします。
 
 ```bash
@@ -35,7 +46,7 @@ Usage:athrill -c<core num> -m <memory config file> [OPTION]... <load_file>
  -t<timeout>                    : set program end time using <timeout> clocks. this option is valid on the background mode.
  -m<memory config file>         : set athrill memory configuration. rom, ram region is configured on your system.
  -d<device config file>         : set device parameter.
-OK: athrill2 is created on /Users/tmori/project/oss/baremetal-athrill-v850e2m/athrill-target-v850e2m/cmake-build/athrill2
+OK: athrill2 is created on /Users/tmori/project/oss/baremetal-athrill-v850e2m/cmake-build/athrill2
 ```
 
 このメッセージが表示されれば、Athrillのビルドが成功しています。

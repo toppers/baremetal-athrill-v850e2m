@@ -16,7 +16,7 @@ cd workspace/run
 
 export PATH=${PATH}:$(pwd)/workspace/run
 
-../../athrill-target-v850e2m/cmake-build/athrill2 \
+../../cmake-build/athrill2 \
     -c1 \
     -m memory.txt \
     -d device_config.txt\
